@@ -11,13 +11,18 @@ namespace Yolov5Net.App
     {
         static void Main(string[] args)
         {
-            string[] files = Directory.GetFiles(@"C:\Users\estagio.sst17\source\repos\yolov5-net\src\Yolov5Net.App\bin\x64\Debug\net5.0\Assets\images");
+            string[] files = Directory.GetFiles(@"C:\Users\estagio.sst17\source\repos\EPIs-Detection\src\Yolov5Net.App\bin\x64\Debug\net5.0\Assets\images");
 
-            foreach(string file in files)
+            System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
+
+            double time = 0.0;
+
+            using var scorer = new YoloScorer<YoloEPIModel>("Assets/Weights/bestx.onnx");
+
+            foreach (string file in files)
             {
                 using var image = Image.FromFile(file);
-
-                using var scorer = new YoloScorer<YoloEPIModel>("Assets/Weights/best.onnx");
 
                 List<YoloPrediction> predictions = scorer.Predict(image);
 
@@ -38,8 +43,18 @@ namespace Yolov5Net.App
                 }
                 string[] name = file.Split('\\');
 
-                image.Save(@"C:\Users\estagio.sst17\source\repos\yolov5-net\src\Yolov5Net.App\bin\x64\Debug\net5.0\Assets\results\" + name[^1]);
+                image.Save(@"C:\Users\estagio.sst17\source\repos\EPIs-Detection\src\Yolov5Net.App\bin\x64\Debug\net5.0\Assets\results-x\" + name[^1]);
+
+                using StreamWriter sw1 = File.AppendText(@"C:\Users\estagio.sst17\source\repos\EPIs-Detection\src\Yolov5Net.App\bin\x64\Debug\net5.0\Assets\results-x\time.txt");
+                sw1.WriteLine("Time for execute 1 image -> " + stopwatch.Elapsed.TotalSeconds.ToString() + "s" + " IMAGE -> " + name[^1] + " Resolution -> " + image.Width.ToString() + "x" + image.Height.ToString());
+
+                time += stopwatch.Elapsed.TotalSeconds;
+
+                stopwatch.Restart();
             }
+
+            using StreamWriter sw = File.AppendText(@"C:\Users\estagio.sst17\source\repos\EPIs-Detection\src\Yolov5Net.App\bin\x64\Debug\net5.0\Assets\results-x\time.txt");
+            sw.WriteLine("Total Time-> " + time.ToString() + "s");
         }
     }
 }
